@@ -1,0 +1,10 @@
+div.geekbench {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	background: #52b4fe;
+	color: white;
+	padding: 0.5em;
+	margin: 0.5em;
+	z-index: 100;
+}

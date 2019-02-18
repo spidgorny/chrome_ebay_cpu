@@ -28,6 +28,9 @@
       "js": [
         "src/inject/inject.js"
       ],
+      "css": [
+        "css/geekbench.css"
+      ],
       "all_frames": true
     }
   ]

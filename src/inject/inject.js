@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -47,14 +48,22 @@ chrome.extension.sendMessage({}, function (response) {
 });
 function parseIframe() {
     return __awaiter(this, void 0, void 0, function () {
-        var cpus, patterns, _i, patterns_1, p, match, mostFrequent, url, res, html;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var cpus, patterns, _i, patterns_1, p, match, mostFrequent_1, url, res, html, doc, cpuLinks, scores, table, _a, scores_1, score, div;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
                     console.log(document.location.href);
                     cpus = [];
                     patterns = [
-                        /Intel Core i.-(\w+)/,
+                        /Core (\S+)/,
+                        /Core 2 Duo (\S+)/,
+                        /Core 2 Quad (\S+)/,
+                        /Xeon (\S+)/,
+                        /Xeon Gold (\S+)/,
+                        /Xeon Silver (\S+)/,
+                        /Atom (\S+)/,
+                        /Celeron (\S+)/,
+                        /Pentium (\S+)/,
                     ];
                     for (_i = 0, patterns_1 = patterns; _i < patterns_1.length; _i++) {
                         p = patterns_1[_i];
@@ -66,10 +75,11 @@ function parseIframe() {
                             }
                         }
                     }
+                    dump('cpus', cpus);
                     if (!cpus.length) return [3 /*break*/, 3];
-                    mostFrequent = mode(cpus);
-                    console.log('mostFrequent', mostFrequent);
-                    url = 'https://cors-anywhere.herokuapp.com/https://browser.geekbench.com/v4/cpu/search?dir=desc&sort=multicore_score&q=' + mostFrequent;
+                    mostFrequent_1 = mode(cpus);
+                    console.log('mostFrequent', mostFrequent_1);
+                    url = 'https://cors-anywhere.herokuapp.com/https://browser.geekbench.com/processor-benchmarks';
                     console.log(url);
                     return [4 /*yield*/, fetch(url, {
                             // mode: 'no-cors',
@@ -79,13 +89,35 @@ function parseIframe() {
                             }
                         })];
                 case 1:
-                    res = _a.sent();
+                    res = _b.sent();
                     dump('res headers', res.headers);
                     return [4 /*yield*/, res.text()];
                 case 2:
-                    html = _a.sent();
-                    console.log('html', html);
-                    _a.label = 3;
+                    html = _b.sent();
+                    doc = new DOMParser().parseFromString(html, "text/html");
+                    cpuLinks = doc.querySelectorAll('div.tab-pane:nth-child(2) td.name a');
+                    scores = Array.from(cpuLinks).filter(function (a) {
+                        return a.innerText.includes(mostFrequent_1);
+                    }).map(function (a) {
+                        return {
+                            name: a.innerText.trim(),
+                            score: a.parentElement.nextSibling.nextSibling.innerText,
+                            link: a.getAttribute('href')
+                        };
+                    });
+                    scores = scores.slice(0, 5); // not too much
+                    dump('scores', scores);
+                    table = '<table>';
+                    for (_a = 0, scores_1 = scores; _a < scores_1.length; _a++) {
+                        score = scores_1[_a];
+                        table += "<tr>\n\t\t\t\t<td>\n\t\t\t\t\t<a href=\"https://browser.geekbench.com" + score.link + "\">" + score.name + "</a>\n\t\t\t\t</td>\n\t\t\t\t<td>" + score.score + "</td>\n\t\t\t</tr>";
+                    }
+                    table += '</table>';
+                    div = document.createElement('div');
+                    div.className = 'geekbench';
+                    div.innerHTML = table;
+                    document.body.appendChild(div);
+                    _b.label = 3;
                 case 3: return [2 /*return*/];
             }
         });

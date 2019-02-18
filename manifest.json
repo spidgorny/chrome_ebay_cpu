@@ -1,0 +1,34 @@
+{
+  "name": "Ebay CPU Performance Info",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "See the performance score of the CPU inside Ebay offers",
+  "homepage_url": "http://extensionizr.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "default_locale": "en",
+  "page_action": {
+    "default_icon": "icons/icon19.png",
+    "default_title": "page action demo",
+    "default_popup": "src/page_action/page_action.html"
+  },
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.ebay.com/*",
+        "https://*.ebay.de/*",
+        "https://*.ebaydesc.com/*"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ],
+      "all_frames": true
+    }
+  ]
+}
